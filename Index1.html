@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Controle de Cuidado - Igreja</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<div class="max-w-5xl mx-auto p-4">
+
+    <h1 class="text-3xl font-bold text-center text-blue-700 mb-6">
+        Controle de Cuidado Pastoral
+    </h1>
+
+    <!-- Formulário -->
+    <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+        <h2 class="text-xl font-semibold mb-4">Novo Cadastro</h2>
+
+        <div class="grid md:grid-cols-2 gap-4">
+            <input id="nome" type="text" placeholder="Nome"
+                class="border p-2 rounded w-full">
+
+            <select id="tipo" class="border p-2 rounded w-full">
+                <option value="Voluntário">Voluntário</option>
+                <option value="Líder">Líder</option>
+            </select>
+
+            <input id="ministerio" type="text" placeholder="Ministério"
+                class="border p-2 rounded w-full">
+
+            <select id="status" class="border p-2 rounded w-full">
+                <option value="Em dia">Em dia</option>
+                <option value="Precisa de visita">Precisa de visita</option>
+                <option value="Afastado">Afastado</option>
+                <option value="Em acompanhamento">Em acompanhamento</option>
+            </select>
+        </div>
+
+        <textarea id="observacao" placeholder="Observações"
+            class="border p-2 rounded w-full mt-4"></textarea>
+
+        <button onclick="adicionarPessoa()"
+            class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">
+            Salvar
+        </button>
+    </div>
+
+    <!-- Filtro -->
+    <div class="flex flex-col md:flex-row md:justify-between items-center mb-4 gap-3">
+        <h2 class="text-xl font-semibold">Lista de Cuidado</h2>
+
+        <select onchange="filtrar(this.value)"
+            class="border p-2 rounded">
+            <option value="Todos">Todos</option>
+            <option value="Voluntário">Voluntários</option>
+            <option value="Líder">Líderes</option>
+        </select>
+    </div>
+
+    <!-- Lista -->
+    <div id="lista" class="space-y-4"></div>
+
+</div>
+
+<script>
+
+let pessoas = [];
+let filtroAtual = "Todos";
+
+function adicionarPessoa() {
+    const nome = document.getElementById("nome").value.trim();
+    const tipo = document.getElementById("tipo").value;
+    const ministerio = document.getElementById("ministerio").value.trim();
+    const status = document.getElementById("status").value;
+    const observacao = document.getElementById("observacao").value.trim();
+
+    if (!nome) return;
+
+    pessoas.push({
+        id: Date.now(),
+        nome,
+        tipo,
+        ministerio,
+        status,
+        observacao
+    });
+
+    limparCampos();
+    renderizar();
+}
+
+function limparCampos() {
+    document.getElementById("nome").value = "";
+    document.getElementById("ministerio").value = "";
+    document.getElementById("observacao").value = "";
+}
+
+function filtrar(tipo) {
+    filtroAtual = tipo;
+    renderizar();
+}
+
+function remover(id) {
+    pessoas = pessoas.filter(p => p.id !== id);
+    renderizar();
+}
+
+function renderizar() {
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    let filtrados = pessoas;
+
+    if (filtroAtual !== "Todos") {
+        filtrados = pessoas.filter(p => p.tipo === filtroAtual);
+    }
+
+    filtrados.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "bg-white p-4 rounded-xl shadow";
+
+        card.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-lg font-bold text-blue-700">${p.nome}</h3>
+                    <p class="text-sm text-gray-600">${p.tipo} - ${p.ministerio || "Sem ministério"}</p>
+                </div>
+                <button onclick="remover(${p.id})"
+                    class="text-red-600 font-bold">X</button>
+            </div>
+
+            <div class="mt-3">
+                <span class="text-sm font-semibold">Status:</span>
+                <span class="text-sm">${p.status}</span>
+            </div>
+
+            ${p.observacao ? `
+            <div class="mt-2 text-sm text-gray-700">
+                <span class="font-semibold">Observação:</span>
+                ${p.observacao}
+            </div>` : ""}
+        `;
+
+        lista.appendChild(card);
+    });
+}
+
+</script>
+
+</body>
+</html>
